@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Build a fitting sheet — Fairway Ledger{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <p class="kicker">Three bags, one auditable sheet</p>
+    <h1>Clubs a fitter can argue with.</h1>
+    <p class="lede">Length and lie from height and wrist-to-floor. Flex from an estimated driver speed. Medical flags applied last. You get a distance bag, a control bag, and the brand you actually asked for.</p>
+  </div>
+  <dl class="stats">
+    <div><dt>Houses</dt><dd>Titleist, TaylorMade, Callaway</dd></div>
+    <div><dt>Every bag</dt><dd>Driver through putter, head and shaft</dd></div>
+    <div><dt>Source of truth</dt><dd>Published rules, not a hidden model</dd></div>
+  </dl>
+</section>
+
+<section class="demos">
+  <p>Start from a sample golfer</p>
+  <div class="chips">
+    <a href="/?demo=average">14-handicap, mixed brands</a>
+    <a href="/?demo=strong">Young, strong, low handicap</a>
+    <a href="/?demo=senior">74, no gym numbers</a>
+    <a href="/?demo=injured">Shoulder and arthritis</a>
+  </div>
+</section>
+
+{% if error %}
+<p class="banner" role="alert">{{ error }}</p>
+{% endif %}
+
+<form class="sheet" method="post" action="/fit">
+  <fieldset>
+    <legend><span>01</span> Body</legend>
+    <div class="grid">
+      <label>Age <input name="age" type="number" min="10" max="100" required value="{{ form.get('age', '') }}"></label>
+      <label>Height (cm) <input name="height_cm" type="number" step="0.1" min="122" max="220" required value="{{ form.get('height_cm', '') }}"></label>
+      <label>Weight (kg) <input name="weight_kg" type="number" step="0.1" min="35" max="200" value="{{ form.get('weight_kg', '') }}"></label>
+      <label>Gender
+        <select name="gender" required>
+          {% set g = form.get('gender', '') %}
+          <option value="" {% if not g %}selected{% endif %}>Select</option>
+          {% for option in ['male', 'female', 'unspecified'] %}
+          <option value="{{ option }}" {% if g == option %}selected{% endif %}>{{ option }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Body type
+        <select name="body_type">
+          {% set b = form.get('body_type', '') %}
+          <option value="">Unknown</option>
+          {% for option in ['ectomorph', 'mesomorph', 'athletic', 'average', 'endomorph', 'heavy'] %}
+          <option value="{{ option }}" {% if b == option %}selected{% endif %}>{{ option }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label>Wrist-to-floor (cm) <input name="wrist_to_floor_cm" type="number" step="0.1" min="50" max="120" value="{{ form.get('wrist_to_floor_cm', '') }}" placeholder="Leave blank to estimate"></label>
+      <label>Hand length (cm) <input name="hand_size_cm" type="number" step="0.1" min="12" max="28" value="{{ form.get('hand_size_cm', '') }}" placeholder="Wrist crease to middle fingertip"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span>02</span> Strength and engine <em>optional</em></legend>
+    <div class="grid">
+      <label>Squat 1RM (kg) <input name="squat_kg" type="number" step="0.1" min="0" max="400" value="{{ form.get('squat_kg', '') }}"></label>
+      <label>Bench 1RM (kg) <input name="bench_press_kg" type="number" step="0.1" min="0" max="300" value="{{ form.get('bench_press_kg', '') }}"></label>
+      <label>Fitness 1–5 <input name="fitness_level" type="number" min="1" max="5" value="{{ form.get('fitness_level', '') }}"></label>
+      <label>VO2 max <input name="vo2_max" type="number" step="0.1" min="15" max="90" value="{{ form.get('vo2_max', '') }}"></label>
+      <label>Resting HR <input name="resting_hr" type="number" min="35" max="120" value="{{ form.get('resting_hr', '') }}"></label>
+      <label>Handicap <input name="handicap" type="number" step="0.1" min="-8" max="54" value="{{ form.get('handicap', '') }}"></label>
+      <label>Measured driver speed (mph) <input name="swing_speed_mph" type="number" step="0.1" min="40" max="150" value="{{ form.get('swing_speed_mph', '') }}" placeholder="Overrides the estimate"></label>
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span>03</span> Brands</legend>
+    <label class="wide">Current set
+      <select name="current_brand">
+        {% set current = form.get('current_brand', '') %}
+        <option value="">None stated</option>
+        {% for brand in brands %}
+        <option value="{{ brand }}" {% if current == brand %}selected{% endif %}>{{ brand }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <div class="checks">
+      <p>Preferred brand, if it differs from the current bag</p>
+      {% set preferred = form.get('preferred_brands') or [] %}
+      {% for brand in brands %}
+      <label class="check"><input type="checkbox" name="preferred_brands" value="{{ brand }}" {% if brand in preferred %}checked{% endif %}> {{ brand }}</label>
+      {% endfor %}
+    </div>
+  </fieldset>
+
+  <fieldset>
+    <legend><span>04</span> Medical <em>optional, sensitive</em></legend>
+    <div class="checks">
+      {% set flags = form.get('medical_flags') or [] %}
+      {% for flag, label in [('shoulder', 'Shoulder'), ('back', 'Back'), ('wrist', 'Wrist'), ('elbow', 'Elbow'), ('arthritis', 'Arthritis'), ('low_bone_density', 'Low bone density')] %}
+      <label class="check"><input type="checkbox" name="medical_flags" value="{{ flag }}" {% if flag in flags %}checked{% endif %}> {{ label }}</label>
+      {% endfor %}
+    </div>
+    <label class="wide">Notes for the fitter
+      <textarea name="medical_notes" rows="3" maxlength="2000" placeholder="Only what the fitter needs. Leave blank if you prefer.">{{ form.get('medical_notes', '') or '' }}</textarea>
+    </label>
+  </fieldset>
+
+  <div class="actions">
+    <button class="primary" type="submit">Build the three bags</button>
+    {% if user %}
+    <button class="ghost" type="submit" formaction="/profile">Save profile only</button>
+    {% else %}
+    <a class="ghost" href="/register">Create an account to keep the sheet</a>
+    {% endif %}
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Saved sheets — Fairway Ledger{% endblock %}
+{% block content %}
+<section class="hero tight">
+  <div>
+    <p class="kicker">Your sheets</p>
+    <h1>{% if user %}Fits on this account{% else %}Log in to see saved sheets{% endif %}</h1>
+    <p class="lede">Anonymous sheets still exist as unlisted links from the result page. An account keeps them together and lets you mark one as taken to a fitter.</p>
+  </div>
+</section>
+{% if not user %}
+<p class="actions"><a class="primary" href="/login">Log in</a> <a class="ghost" href="/register">Create an account</a></p>
+{% elif not rows %}
+<p>No sheets yet. Build one from the fit form.</p>
+{% else %}
+<div class="table-wrap">
+  <table>
+    <thead><tr><th>When</th><th>Flex</th><th>Speed</th><th>Bags</th><th>Fitter</th><th></th></tr></thead>
+    <tbody>
+      {% for row in rows %}
+      <tr>
+        <td>{{ row.created_at[:16]|replace('T', ' ') }}</td>
+        <td>{{ row.target.flex }}</td>
+        <td>{{ row.target.swing_speed_mph|round(0)|int }} mph</td>
+        <td>{{ row.sets|map(attribute='brand')|join(', ') }}</td>
+        <td>{% if row.taken_to_fitter %}Taken{% if row.rating %} · {{ row.rating }}/5{% endif %}{% else %}—{% endif %}</td>
+        <td><a href="/sheet/{{ row.id }}">Open</a></td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endif %}
+{% endblock %}

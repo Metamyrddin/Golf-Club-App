@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block title %}Catalog — Fairway Ledger{% endblock %}
+{% block content %}
+<section class="hero tight">
+  <div>
+    <p class="kicker">Version 1 catalog</p>
+    <h1>Three houses, full bags.</h1>
+    <p class="lede">Model names are synthetic. Loft ladders, shaft weights and launch profiles follow the shape of current lines so a fitter can extend them later without pretending they are a shop SKU.</p>
+  </div>
+</section>
+{% for brand in brand_rows %}
+<section class="brand-block">
+  <h2>{{ brand.name }}</h2>
+  <p class="quiet">{{ brand.blurb }}</p>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Head</th><th>Slot</th><th>Category</th><th>Lofts</th></tr></thead>
+      <tbody>
+        {% for head in heads if head.brand_id == brand.id %}
+        <tr>
+          <td>{{ head.model }}</td>
+          <td>{{ head.club_type|replace('_', ' ') }}</td>
+          <td>{{ head.category|replace('_', ' ') }}</td>
+          <td>{{ head.lofts }}{% if head.set_makeup %} · {{ head.set_makeup }}{% endif %}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Shaft</th><th>Job</th><th>Flexes (grams)</th></tr></thead>
+      <tbody>
+        {% for shaft in shafts if shaft.brand_id == brand.id %}
+        <tr>
+          <td>{{ shaft.model }}<br><span class="quiet">{{ shaft.families|join(', ') }}</span></td>
+          <td>{{ shaft.profile }} · {{ shaft.launch }} launch</td>
+          <td>
+            {% for flex, grams in shaft.flex_weights.items() %}{{ flex }} {{ grams|round(0)|int }}{% if not loop.last %} · {% endif %}{% endfor %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</section>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,1 @@
+"""Server-rendered fitting desk."""

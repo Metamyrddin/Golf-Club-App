@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Account — Fairway Ledger{% endblock %}
+{% block content %}
+<section class="hero tight">
+  <div>
+    <p class="kicker">Account</p>
+    <h1>{% if user %}{{ user.email }}{% else %}Not logged in{% endif %}</h1>
+  </div>
+</section>
+{% if not user %}
+<p><a href="/login">Log in</a></p>
+{% elif profile %}
+<dl class="stats">
+  <div><dt>Age / height</dt><dd>{{ profile.age }} · {{ profile.height_cm }} cm</dd></div>
+  <div><dt>Gender</dt><dd>{{ profile.gender }}</dd></div>
+  <div><dt>Medical storage</dt><dd>{{ profile.medical_storage }}</dd></div>
+  <div><dt>Flags</dt><dd>{{ profile.medical_flags|join(', ') or 'none' }}</dd></div>
+</dl>
+<p class="quiet">Storage “plaintext” means no MEDICAL_FERNET_KEY is set on this server. Do not use that mode for a shared database.</p>
+<p><a href="/saved">View sheets</a></p>
+{% else %}
+<p>No profile saved yet. Fill the fit form and choose “Save profile only”.</p>
+{% endif %}
+{% endblock %}

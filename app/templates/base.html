@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Fairway Ledger{% endblock %}</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header class="top">
+    <a class="mark" href="/">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 26c6-2 8-10 10-18 2 8 4 16 10 18" fill="none" stroke="currentColor" stroke-width="1.6"/><circle cx="16" cy="7" r="1.6" fill="currentColor"/></svg>
+      <span>Fairway Ledger</span>
+    </a>
+    <nav>
+      <a href="/">Fit</a>
+      <a href="/catalog">Catalog</a>
+      <a href="/rules">Rules</a>
+      <a href="/saved">Sheets</a>
+      {% if user %}
+        <a href="/account">{{ user.email }}</a>
+        <form method="post" action="/logout"><button class="text" type="submit">Log out</button></form>
+      {% else %}
+        <a href="/login">Log in</a>
+      {% endif %}
+    </nav>
+  </header>
+  <main id="content">
+    {% block content %}{% endblock %}
+  </main>
+  <footer class="foot">
+    <p>Medical notes are optional and treated as sensitive. Set a Fernet key before any shared database. Static rules are a starting sheet for a fitter, not a launch-monitor session and not medical advice.</p>
+  </footer>
+</body>
+</html>

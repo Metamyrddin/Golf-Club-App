@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Fitting rules — Fairway Ledger{% endblock %}
+{% block content %}
+<section class="hero tight">
+  <div>
+    <p class="kicker">Rulebook</p>
+    <h1>Every number has an id.</h1>
+    <p class="lede">The same text lives in <code>app/fitting/rulebook.py</code>. If a sheet and this page disagree, the code that produced the sheet wins — and the id tells you which function to open.</p>
+  </div>
+</section>
+<ol class="rulebook">
+  {% for rule in rules %}
+  <li>
+    <h2>{{ rule.id }}</h2>
+    <p>{{ rule.text }}</p>
+  </li>
+  {% endfor %}
+</ol>
+{% endblock %}

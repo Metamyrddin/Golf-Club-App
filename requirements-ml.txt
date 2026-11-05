@@ -1,0 +1,3 @@
+# Optional. The recommendation engine does not import these.
+-r requirements.txt
+scikit-learn>=1.5

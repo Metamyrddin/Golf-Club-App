@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Fitting sheet — Fairway Ledger{% endblock %}
+{% block content %}
+{% set t = result.target %}
+<section class="hero tight">
+  <div>
+    <p class="kicker">Fitting sheet{% if result.id %} · {{ result.id[:8] }}{% endif %}</p>
+    <h1>{{ t.flex }} flex · {{ '%+.2f'|format(t.length_delta_in) }} in · {{ t.lie_label }}</h1>
+    <p class="lede">{{ t.swing_speed_mph|round(0)|int }} mph driver speed ({{ t.swing_speed_source }}). Head family {{ t.head_category|replace('_', ' ') }}. Grip {{ t.grip }}.</p>
+  </div>
+  <dl class="stats">
+    <div><dt>Wrist-to-floor</dt><dd>{{ '%.0f'|format(t.wrist_to_floor_cm) }} cm {% if t.wrist_to_floor_estimated %}estimated{% else %}measured{% endif %}</dd></div>
+    <div><dt>Lie</dt><dd>{{ '%+.1f'|format(t.lie_delta_deg) }}°</dd></div>
+    <div><dt>Before medical</dt><dd>{{ t.flex_before_medical }} flex · {{ t.head_category_before_medical|replace('_', ' ') }}</dd></div>
+  </dl>
+</section>
+
+{% if result.assumptions %}
+<ul class="notes">
+  {% for note in result.assumptions %}
+  <li>{{ note }}</li>
+  {% endfor %}
+</ul>
+{% endif %}
+
+{% if t.medical_notes %}
+<p class="banner">Medical adjustment is already in the flex, loft and grip above. Flags: {{ t.medical_flags|join(', ') or 'none' }}.</p>
+{% endif %}
+
+<div class="bags">
+  {% for bag in result.sets %}
+  <article class="bag bag-{{ bag.id }}">
+    <header>
+      <p class="kicker">{{ bag.name }}</p>
+      <h2>{{ bag.brand }}</h2>
+      <p class="meta">Flex family {{ bag.flex_family }}{% if bag.flex_consistent %} · consistent{% else %} · mixed, see notes{% endif %}</p>
+    </header>
+    <p class="rationale">{{ bag.rationale }}</p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Club</th><th>Head</th><th>Shaft</th><th>Spec</th></tr>
+        </thead>
+        <tbody>
+          {% for club in bag.clubs %}
+          <tr>
+            <td>{{ club.label }}</td>
+            <td>{{ club.head.model }}</td>
+            <td>{{ club.shaft.model }}<br><span class="quiet">{{ club.shaft.weight_g|round(0)|int }} g · {{ club.flex }}</span></td>
+            <td>
+              {% if club.loft is not none %}{{ '%.1f'|format(club.loft) }}°{% endif %}
+              <br><span class="quiet">{{ '%.2f'|format(club.recommended_length_in) }} in · {{ club.grip }}{% if club.lie_label != 'confirm separately' %} · {{ club.lie_label }}{% endif %}</span>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% if bag.mix_notes %}
+    <ul class="mix">
+      {% for note in bag.mix_notes %}<li>{{ note }}</li>{% endfor %}
+    </ul>
+    {% endif %}
+  </article>
+  {% endfor %}
+</div>
+
+{% if result.id %}
+<p class="exports">
+  <a href="/api/recommendations/{{ result.id }}/export.pdf">Download PDF</a>
+  <a href="/api/recommendations/{{ result.id }}/export.csv">Download CSV</a>
+  <a href="/api/recommendations/{{ result.id }}/export.json">JSON</a>
+  <a href="/sheet/{{ result.id }}">Sheet link</a>
+</p>
+{% endif %}
+
+<p class="disclaimer">{{ result.disclaimer }}</p>
+
+<details class="rules-fired">
+  <summary>Rules that fired</summary>
+  <p>{{ result.rules_fired|join(' · ') }}</p>
+</details>
+<p class="back"><a href="/">Adjust the profile</a></p>
+{% endblock %}
