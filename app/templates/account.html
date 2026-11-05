@@ -11,7 +11,8 @@
 <p><a href="/login">Log in</a></p>
 {% elif profile %}
 <dl class="stats">
-  <div><dt>Age / height</dt><dd>{{ profile.age }} · {{ profile.height_cm }} cm</dd></div>
+  <div><dt>Age / height</dt><dd>{{ profile.age }} · {{ profile.height_ft }}' {{ profile.height_in }}"</dd></div>
+  <div><dt>Weight</dt><dd>{% if profile.weight_lb %}{{ profile.weight_lb }} lb{% else %}—{% endif %}</dd></div>
   <div><dt>Gender</dt><dd>{{ profile.gender }}</dd></div>
   <div><dt>Medical storage</dt><dd>{{ profile.medical_storage }}</dd></div>
   <div><dt>Flags</dt><dd>{{ profile.medical_flags|join(', ') or 'none' }}</dd></div>

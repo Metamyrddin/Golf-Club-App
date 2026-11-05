@@ -38,19 +38,24 @@ class UserOut(BaseModel):
 class ProfileIn(BaseModel):
     """All physical fields except age, height and gender are optional.
 
+    Height is feet and inches. Weight, wrist-to-floor, hand length, and
+    lifts are pounds and inches. The service converts to metric before
+    the fitting rules run.
+
     Medical flags use a small controlled vocabulary:
     shoulder, back, wrist, elbow, arthritis, low_bone_density.
     """
 
     age: int | None = Field(default=None, ge=10, le=100)
-    height_cm: float | None = Field(default=None, ge=122, le=220)
+    height_ft: int | None = Field(default=None, ge=4, le=7)
+    height_in: float | None = Field(default=None, ge=0, le=11.9)
     gender: str | None = None
-    weight_kg: float | None = Field(default=None, ge=35, le=200)
+    weight_lb: float | None = Field(default=None, ge=77, le=440)
     body_type: str | None = None
-    wrist_to_floor_cm: float | None = Field(default=None, ge=50, le=120)
-    hand_size_cm: float | None = Field(default=None, ge=12, le=28)
-    bench_press_kg: float | None = Field(default=None, ge=0, le=300)
-    squat_kg: float | None = Field(default=None, ge=0, le=400)
+    wrist_to_floor_in: float | None = Field(default=None, ge=20, le=47)
+    hand_size_in: float | None = Field(default=None, ge=4.5, le=11)
+    bench_press_lb: float | None = Field(default=None, ge=0, le=660)
+    squat_lb: float | None = Field(default=None, ge=0, le=880)
     vo2_max: float | None = Field(default=None, ge=15, le=90)
     resting_hr: float | None = Field(default=None, ge=35, le=120)
     fitness_level: int | None = Field(default=None, ge=1, le=5)
@@ -66,13 +71,15 @@ class ProfileIn(BaseModel):
             "examples": [
                 {
                     "age": 46,
-                    "height_cm": 180,
-                    "weight_kg": 86,
+                    "height_ft": 5,
+                    "height_in": 11,
+                    "weight_lb": 190,
                     "gender": "male",
                     "body_type": "average",
-                    "wrist_to_floor_cm": 89,
+                    "wrist_to_floor_in": 35,
                     "handicap": 14,
                     "fitness_level": 3,
+                    "squat_lb": 220,
                     "preferred_brands": ["Titleist"],
                     "current_brand": "Callaway",
                     "medical_flags": [],

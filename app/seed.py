@@ -15,9 +15,8 @@ from app.fitting.profile import GolferProfile
 from app.models import Brand, ClubHead, Profile, Recommendation, Shaft, User
 from app.privacy import seal
 from app.security import hash_password
-from app.services import build_recommendation
+from app.services import build_recommendation, profile_in_from_golfer
 from app.synthetic import sample_profile
-from app.schemas import ProfileIn
 
 DEMO_EMAIL = "demo@example.com"
 DEMO_PASSWORD = "FitSheet-demo-1"
@@ -97,7 +96,7 @@ def _ensure_user(session, email: str, password: str, profile: GolferProfile, wit
             build_recommendation(
                 session,
                 user,
-                ProfileIn(**profile.to_dict()),
+                profile_in_from_golfer(profile),
                 save=True,
             )
     else:

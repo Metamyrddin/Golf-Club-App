@@ -39,6 +39,9 @@ def test_three_diverse_bags_for_a_plain_profile():
     result = _bags(GolferProfile(age=46, height_cm=180, weight_kg=86, gender="male", handicap=14))
     _assert_full_bag(result)
     assert result["target"]["flex"] in {"R", "S", "A"}
+    assert "wrist_to_floor_cm" not in result["target"]
+    assert result["target"]["wrist_to_floor_in"] > 20
+    assert " in " in result["sets"][0]["rationale"]
     drivers = [next(c for c in bag["clubs"] if c["slot"] == "driver") for bag in result["sets"]]
     lofts = [club["loft"] for club in drivers]
     assert lofts[0] >= lofts[2]  # distance loft at least the neutral bag

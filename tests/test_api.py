@@ -28,12 +28,14 @@ def _auth(client: TestClient, email: str = "ada@example.com") -> dict:
 
 PROFILE = {
     "age": 46,
-    "height_cm": 180,
-    "weight_kg": 86,
+    "height_ft": 5,
+    "height_in": 11,
+    "weight_lb": 190,
     "gender": "male",
     "body_type": "average",
-    "wrist_to_floor_cm": 89,
+    "wrist_to_floor_in": 35,
     "handicap": 14,
+    "squat_lb": 220,
     "preferred_brands": ["Titleist"],
     "current_brand": "Callaway",
     "medical_flags": ["shoulder"],
@@ -74,6 +76,10 @@ def test_register_login_profile_recommend_feedback_export(client: TestClient):
     assert saved.status_code == 200, saved.text
     assert saved.json()["medical_flags"] == ["shoulder"]
     assert saved.json()["medical_storage"] == "plaintext"
+    assert saved.json()["height_ft"] == 5
+    assert saved.json()["height_in"] == 11
+    assert saved.json()["weight_lb"] == 190
+    assert "height_cm" not in saved.json()
 
     fit = client.post("/api/recommendations", json={"use_saved_profile": True}, headers=headers)
     assert fit.status_code == 200, fit.text
@@ -112,7 +118,7 @@ def test_anonymous_inline_fit_and_home_page(client: TestClient):
     assert "Fairway Ledger" in page.text
     fit = client.post(
         "/api/recommendations",
-        json={"profile": {"age": 74, "height_cm": 173, "gender": "male"}, "save": True},
+        json={"profile": {"age": 74, "height_ft": 5, "height_in": 8, "gender": "male"}, "save": True},
     )
     assert fit.status_code == 200, fit.text
     body = fit.json()

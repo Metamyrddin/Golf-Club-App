@@ -70,7 +70,7 @@ def recommendation_pdf(result: dict) -> bytes:
             f"Grip {target['grip']}"
         ),
         f"Head category {target['head_category'].replace('_', ' ')}",
-        f"Wrist-to-floor {target['wrist_to_floor_cm']:.0f} cm"
+        f"Wrist-to-floor {target['wrist_to_floor_in']:.1f} in"
         + (" estimated" if target["wrist_to_floor_estimated"] else " measured"),
     ]
     if target.get("medical_flags"):

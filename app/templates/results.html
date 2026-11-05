@@ -9,7 +9,7 @@
     <p class="lede">{{ t.swing_speed_mph|round(0)|int }} mph driver speed ({{ t.swing_speed_source }}). Head family {{ t.head_category|replace('_', ' ') }}. Grip {{ t.grip }}.</p>
   </div>
   <dl class="stats">
-    <div><dt>Wrist-to-floor</dt><dd>{{ '%.0f'|format(t.wrist_to_floor_cm) }} cm {% if t.wrist_to_floor_estimated %}estimated{% else %}measured{% endif %}</dd></div>
+    <div><dt>Wrist-to-floor</dt><dd>{{ '%.1f'|format(t.wrist_to_floor_in) }} in {% if t.wrist_to_floor_estimated %}estimated{% else %}measured{% endif %}</dd></div>
     <div><dt>Lie</dt><dd>{{ '%+.1f'|format(t.lie_delta_deg) }}°</dd></div>
     <div><dt>Before medical</dt><dd>{{ t.flex_before_medical }} flex · {{ t.head_category_before_medical|replace('_', ' ') }}</dd></div>
   </dl>

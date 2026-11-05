@@ -16,7 +16,7 @@ The rule engine is the source of truth. An optional scikit-learn tree (`scripts/
 
 ## Fitting logic, in plain language
 
-1. **Wrist-to-floor** decides length and lie. One inch away from the gender reference (men 87 cm, women 81 cm) is one inch of length and one degree of lie. Higher wrists → longer and more upright. Clamped to ±2 inches and ±4°. Body type adds a small nudge (heavier builds slightly longer and more upright, ectomorphs slightly flatter). If wrist-to-floor was not measured, it is estimated from height and that is said out loud.
+1. **Wrist-to-floor** decides length and lie. You enter it in inches. One inch away from the gender reference (men 34.25 in, women 31.9 in) is one inch of length and one degree of lie. Higher wrists → longer and more upright. Clamped to ±2 inches and ±4°. Body type adds a small nudge. If wrist-to-floor was not measured, it is estimated from height and the sheet says so. Feet, inches, and pounds are converted to the chart’s metric anchors before any rule runs, then converted back for the sheet.
 2. **Driver speed** starts at 95 mph for a 30-year-old man and 76 mph for a 30-year-old woman. It falls 0.35 mph per year after 35. Squat and bench, relative to body weight, move it (squat counts twice as much as bench). Fitness, VO2, and resting heart rate are averaged if you have them. A handicap is blended in when speed was not measured. A measured speed replaces the estimate.
 3. **Flex** is L < 75, A 75–84, R 85–95, S 96–104, X at 105 mph and up. The same flex is preferred on every full-swing club. The putter shaft is stock and does not count as a mixed bag.
 4. **Head family** follows handicap when you have one (players, players-distance, game improvement, super game improvement). Otherwise it follows speed and age.
@@ -128,8 +128,8 @@ curl -s -c /tmp/golf.jar -X POST localhost:8000/api/auth/register \
 curl -s -b /tmp/golf.jar -X PUT localhost:8000/api/profile \
   -H 'content-type: application/json' \
   -d '{
-    "age": 46, "height_cm": 180, "weight_kg": 86, "gender": "male",
-    "wrist_to_floor_cm": 89, "handicap": 14,
+    "age": 46, "height_ft": 5, "height_in": 11, "weight_lb": 190, "gender": "male",
+    "wrist_to_floor_in": 35, "handicap": 14, "squat_lb": 220,
     "preferred_brands": ["Titleist"], "current_brand": "Callaway"
   }'
 ```
@@ -143,7 +143,7 @@ curl -s -b /tmp/golf.jar -X POST localhost:8000/api/recommendations \
 
 curl -s -X POST localhost:8000/api/recommendations \
   -H 'content-type: application/json' \
-  -d '{"profile": {"age": 74, "height_cm": 173, "gender": "male"}, "save": true}'
+  -d '{"profile": {"age": 74, "height_ft": 5, "height_in": 8, "gender": "male"}, "save": true}'
 ```
 
 Export, feedback, catalog:

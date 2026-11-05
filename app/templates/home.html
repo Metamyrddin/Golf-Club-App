@@ -33,8 +33,9 @@
     <legend><span>01</span> Body</legend>
     <div class="grid">
       <label>Age <input name="age" type="number" min="10" max="100" required value="{{ form.get('age', '') }}"></label>
-      <label>Height (cm) <input name="height_cm" type="number" step="0.1" min="122" max="220" required value="{{ form.get('height_cm', '') }}"></label>
-      <label>Weight (kg) <input name="weight_kg" type="number" step="0.1" min="35" max="200" value="{{ form.get('weight_kg', '') }}"></label>
+      <label>Height (ft) <input name="height_ft" type="number" min="4" max="7" required value="{{ form.get('height_ft', '') }}"></label>
+      <label>Height (in) <input name="height_in" type="number" step="0.1" min="0" max="11.9" value="{{ form.get('height_in', '') }}"></label>
+      <label>Weight (lb) <input name="weight_lb" type="number" step="0.1" min="77" max="440" value="{{ form.get('weight_lb', '') }}"></label>
       <label>Gender
         <select name="gender" required>
           {% set g = form.get('gender', '') %}
@@ -53,16 +54,16 @@
           {% endfor %}
         </select>
       </label>
-      <label>Wrist-to-floor (cm) <input name="wrist_to_floor_cm" type="number" step="0.1" min="50" max="120" value="{{ form.get('wrist_to_floor_cm', '') }}" placeholder="Leave blank to estimate"></label>
-      <label>Hand length (cm) <input name="hand_size_cm" type="number" step="0.1" min="12" max="28" value="{{ form.get('hand_size_cm', '') }}" placeholder="Wrist crease to middle fingertip"></label>
+      <label>Wrist-to-floor (in) <input name="wrist_to_floor_in" type="number" step="0.1" min="20" max="47" value="{{ form.get('wrist_to_floor_in', '') }}" placeholder="Leave blank to estimate"></label>
+      <label>Hand length (in) <input name="hand_size_in" type="number" step="0.1" min="4.5" max="11" value="{{ form.get('hand_size_in', '') }}" placeholder="Wrist crease to middle fingertip"></label>
     </div>
   </fieldset>
 
   <fieldset>
     <legend><span>02</span> Strength and engine <em>optional</em></legend>
     <div class="grid">
-      <label>Squat 1RM (kg) <input name="squat_kg" type="number" step="0.1" min="0" max="400" value="{{ form.get('squat_kg', '') }}"></label>
-      <label>Bench 1RM (kg) <input name="bench_press_kg" type="number" step="0.1" min="0" max="300" value="{{ form.get('bench_press_kg', '') }}"></label>
+      <label>Squat 1RM (lb) <input name="squat_lb" type="number" step="1" min="0" max="880" value="{{ form.get('squat_lb', '') }}"></label>
+      <label>Bench 1RM (lb) <input name="bench_press_lb" type="number" step="1" min="0" max="660" value="{{ form.get('bench_press_lb', '') }}"></label>
       <label>Fitness 1–5 <input name="fitness_level" type="number" min="1" max="5" value="{{ form.get('fitness_level', '') }}"></label>
       <label>VO2 max <input name="vo2_max" type="number" step="0.1" min="15" max="90" value="{{ form.get('vo2_max', '') }}"></label>
       <label>Resting HR <input name="resting_hr" type="number" min="35" max="120" value="{{ form.get('resting_hr', '') }}"></label>

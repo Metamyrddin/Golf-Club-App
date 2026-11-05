@@ -31,6 +31,7 @@ from app.fitting.specs import (
     length_and_lie,
     shift_category,
 )
+from app.units import cm_to_ft_in, cm_to_inches, kg_to_lb
 
 BRAND_ALIASES = {
     "titleist": "Titleist",
@@ -522,7 +523,7 @@ def _rationale(
             )
         ),
         (
-            f"Wrist-to-floor {target['wrist_to_floor_cm']:.0f} cm "
+            f"Wrist-to-floor {target['wrist_to_floor_in']:.1f} in "
             f"({'estimated' if target['wrist_to_floor_estimated'] else 'measured'}) "
             f"puts length at {target['length_delta_in']:+.2f} in versus the "
             f"{profile.gender} standard and lie at {target['lie_delta_deg']:+.1f}° "
@@ -593,8 +594,8 @@ def recommend(profile: GolferProfile, catalog: dict | None = None) -> dict:
 
     if profile.height_cm < 145 or profile.height_cm > 205:
         assumptions.append(
-            "Height is outside the range this static chart was anchored on. "
-            "Treat length and lie as a rough start and check them on a board."
+            "Height is outside the range this static chart was anchored on "
+            "(about 4'9\" to 6'9\"). Treat length and lie as a rough start and check them on a board."
         )
     wtf, estimated = estimate_wrist_to_floor(profile)
     if estimated:
@@ -627,13 +628,15 @@ def recommend(profile: GolferProfile, catalog: dict | None = None) -> dict:
         rules.append("MED-1")
 
     brands = assign_brands(profile)
+    height_ft, height_in = cm_to_ft_in(profile.height_cm)
     target = {
         "gender": profile.gender,
         "age": profile.age,
-        "height_cm": profile.height_cm,
-        "weight_kg": profile.weight_kg,
+        "height_ft": height_ft,
+        "height_in": height_in,
+        "weight_lb": kg_to_lb(profile.weight_kg) if profile.weight_kg else None,
         "body_type": profile.body_type,
-        "wrist_to_floor_cm": wtf,
+        "wrist_to_floor_in": cm_to_inches(wtf),
         "wrist_to_floor_estimated": estimated,
         "swing_speed_mph": speed.mph,
         "swing_speed_source": speed.source,
