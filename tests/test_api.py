@@ -116,6 +116,14 @@ def test_anonymous_inline_fit_and_home_page(client: TestClient):
     page = client.get("/")
     assert page.status_code == 200
     assert "Fairway Ledger" in page.text
+    assert "/static/body/ectomorph.jpg" in page.text
+    assert page.text.count("<details") == 5
+    assert "<details" in page.text and "open" not in page.text.split("<form", 1)[1].split("</form", 1)[0]
+    demo = client.get("/?demo=average")
+    form = demo.text.split("<form", 1)[1].split("</form", 1)[0]
+    assert form.count("<details") == 5
+    assert form.count(" open") == 4
+    assert 'value="average"' in form and "checked" in form
     fit = client.post(
         "/api/recommendations",
         json={"profile": {"age": 74, "height_ft": 5, "height_in": 8, "gender": "male"}, "save": True},

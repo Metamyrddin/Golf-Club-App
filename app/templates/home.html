@@ -30,12 +30,11 @@
 
 <form class="sheet" method="post" action="/fit">
   <fieldset>
-    <legend><span>01</span> Body</legend>
+    <legend><span>01</span> Who you are</legend>
     <div class="grid">
       <label>Age <input name="age" type="number" min="10" max="100" required value="{{ form.get('age', '') }}"></label>
       <label>Height (ft) <input name="height_ft" type="number" min="4" max="7" required value="{{ form.get('height_ft', '') }}"></label>
       <label>Height (in) <input name="height_in" type="number" step="0.1" min="0" max="11.9" value="{{ form.get('height_in', '') }}"></label>
-      <label>Weight (lb) <input name="weight_lb" type="number" step="0.1" min="77" max="440" value="{{ form.get('weight_lb', '') }}"></label>
       <label>Gender
         <select name="gender" required>
           {% set g = form.get('gender', '') %}
@@ -45,35 +44,66 @@
           {% endfor %}
         </select>
       </label>
-      <label>Body type
-        <select name="body_type">
-          {% set b = form.get('body_type', '') %}
-          <option value="">Unknown</option>
-          {% for option in ['ectomorph', 'mesomorph', 'athletic', 'average', 'endomorph', 'heavy'] %}
-          <option value="{{ option }}" {% if b == option %}selected{% endif %}>{{ option }}</option>
-          {% endfor %}
-        </select>
-      </label>
-      <label>Wrist-to-floor (in) <input name="wrist_to_floor_in" type="number" step="0.1" min="20" max="47" value="{{ form.get('wrist_to_floor_in', '') }}" placeholder="Leave blank to estimate"></label>
-      <label>Hand length (in) <input name="hand_size_in" type="number" step="0.1" min="4.5" max="11" value="{{ form.get('hand_size_in', '') }}" placeholder="Wrist crease to middle fingertip"></label>
     </div>
   </fieldset>
 
-  <fieldset>
-    <legend><span>02</span> Strength and engine <em>optional</em></legend>
+  {% set b = form.get('body_type', '') or '' %}
+  <details class="fold" {% if b or form.get('weight_lb') not in (none, '') or form.get('wrist_to_floor_in') not in (none, '') or form.get('hand_size_in') not in (none, '') %}open{% endif %}>
+    <summary><span>02</span> Build <em>optional</em></summary>
+    <p class="quiet">Pick the drawing closest to you. It only nudges length and lie. Weight and the two tape measures are optional too.</p>
+    <div class="body-picks">
+      <label class="pick">
+        <input type="radio" name="body_type" value="" {% if not b %}checked{% endif %}>
+        <span class="pick-blank" aria-hidden="true">?</span>
+        <span class="pick-name">Not sure</span>
+      </label>
+      {% for option, label, hint in [
+        ('ectomorph', 'Ectomorph', 'Narrow, long limbs'),
+        ('mesomorph', 'Mesomorph', 'Even, medium frame'),
+        ('athletic', 'Athletic', 'Broad shoulders, trim waist'),
+        ('average', 'Average', 'Everyday mid build'),
+        ('endomorph', 'Endomorph', 'Rounder torso'),
+        ('heavy', 'Heavy', 'Broad, solid frame'),
+      ] %}
+      <label class="pick">
+        <input type="radio" name="body_type" value="{{ option }}" {% if b == option %}checked{% endif %}>
+        <img src="/static/body/{{ option }}.jpg" alt="" width="420" height="630">
+        <span class="pick-name">{{ label }}</span>
+        <small>{{ hint }}</small>
+      </label>
+      {% endfor %}
+    </div>
+    <div class="grid">
+      <label>Weight (lb) <input name="weight_lb" type="number" step="0.1" min="77" max="440" value="{{ form.get('weight_lb', '') }}"></label>
+      <label>Wrist-to-floor (in) <input name="wrist_to_floor_in" type="number" step="0.1" min="20" max="47" value="{{ form.get('wrist_to_floor_in', '') }}" placeholder="Leave blank to estimate"></label>
+      <label>Hand length (in) <input name="hand_size_in" type="number" step="0.1" min="4.5" max="11" value="{{ form.get('hand_size_in', '') }}" placeholder="Wrist crease to middle fingertip"></label>
+    </div>
+  </details>
+
+  {% set hcp = form.get('handicap') %}
+  <details class="fold" {% if (hcp is not none and hcp != '') or form.get('swing_speed_mph') not in (none, '') %}open{% endif %}>
+    <summary><span>03</span> Handicap <em>optional</em></summary>
+    <p class="quiet">Index from plus-8 to 54. If you have not measured driver speed, the handicap is blended into the estimate.</p>
+    <div class="grid">
+      <label>Handicap index <input name="handicap" type="number" step="0.1" min="-8" max="54" value="{{ '' if hcp is none else hcp }}" placeholder="Leave blank if you do not keep one"></label>
+      <label>Measured driver speed (mph) <input name="swing_speed_mph" type="number" step="0.1" min="40" max="150" value="{{ form.get('swing_speed_mph', '') }}" placeholder="Overrides the estimate"></label>
+    </div>
+  </details>
+
+  <details class="fold" {% if form.get('squat_lb') not in (none, '') or form.get('bench_press_lb') not in (none, '') or form.get('fitness_level') not in (none, '') or form.get('vo2_max') not in (none, '') or form.get('resting_hr') not in (none, '') %}open{% endif %}>
+    <summary><span>04</span> Strength and engine <em>optional</em></summary>
     <div class="grid">
       <label>Squat 1RM (lb) <input name="squat_lb" type="number" step="1" min="0" max="880" value="{{ form.get('squat_lb', '') }}"></label>
       <label>Bench 1RM (lb) <input name="bench_press_lb" type="number" step="1" min="0" max="660" value="{{ form.get('bench_press_lb', '') }}"></label>
       <label>Fitness 1–5 <input name="fitness_level" type="number" min="1" max="5" value="{{ form.get('fitness_level', '') }}"></label>
       <label>VO2 max <input name="vo2_max" type="number" step="0.1" min="15" max="90" value="{{ form.get('vo2_max', '') }}"></label>
       <label>Resting HR <input name="resting_hr" type="number" min="35" max="120" value="{{ form.get('resting_hr', '') }}"></label>
-      <label>Handicap <input name="handicap" type="number" step="0.1" min="-8" max="54" value="{{ form.get('handicap', '') }}"></label>
-      <label>Measured driver speed (mph) <input name="swing_speed_mph" type="number" step="0.1" min="40" max="150" value="{{ form.get('swing_speed_mph', '') }}" placeholder="Overrides the estimate"></label>
     </div>
-  </fieldset>
+  </details>
 
-  <fieldset>
-    <legend><span>03</span> Brands</legend>
+  {% set preferred = form.get('preferred_brands') or [] %}
+  <details class="fold" {% if form.get('current_brand') or preferred %}open{% endif %}>
+    <summary><span>05</span> Brands <em>optional</em></summary>
     <label class="wide">Current set
       <select name="current_brand">
         {% set current = form.get('current_brand', '') %}
@@ -85,17 +115,16 @@
     </label>
     <div class="checks">
       <p>Preferred brand, if it differs from the current bag</p>
-      {% set preferred = form.get('preferred_brands') or [] %}
       {% for brand in brands %}
       <label class="check"><input type="checkbox" name="preferred_brands" value="{{ brand }}" {% if brand in preferred %}checked{% endif %}> {{ brand }}</label>
       {% endfor %}
     </div>
-  </fieldset>
+  </details>
 
-  <fieldset>
-    <legend><span>04</span> Medical <em>optional, sensitive</em></legend>
+  {% set flags = form.get('medical_flags') or [] %}
+  <details class="fold" {% if flags or form.get('medical_notes') %}open{% endif %}>
+    <summary><span>06</span> Medical <em>optional, sensitive</em></summary>
     <div class="checks">
-      {% set flags = form.get('medical_flags') or [] %}
       {% for flag, label in [('shoulder', 'Shoulder'), ('back', 'Back'), ('wrist', 'Wrist'), ('elbow', 'Elbow'), ('arthritis', 'Arthritis'), ('low_bone_density', 'Low bone density')] %}
       <label class="check"><input type="checkbox" name="medical_flags" value="{{ flag }}" {% if flag in flags %}checked{% endif %}> {{ label }}</label>
       {% endfor %}
@@ -103,7 +132,7 @@
     <label class="wide">Notes for the fitter
       <textarea name="medical_notes" rows="3" maxlength="2000" placeholder="Only what the fitter needs. Leave blank if you prefer.">{{ form.get('medical_notes', '') or '' }}</textarea>
     </label>
-  </fieldset>
+  </details>
 
   <div class="actions">
     <button class="primary" type="submit">Build the three bags</button>

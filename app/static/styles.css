@@ -105,9 +105,79 @@ main { padding: 12px 0 48px; }
 
 .sheet, .auth { padding: 8px 18px 18px; margin-top: 18px; }
 fieldset { border: 0; border-top: 1px solid var(--line); margin: 0; padding: 16px 0 8px; }
+details.fold { border-top: 1px solid var(--line); padding: 4px 0 10px; }
+details.fold > summary {
+  font-family: var(--serif);
+  font-size: 1.25rem;
+  cursor: pointer;
+  list-style: none;
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+details.fold > summary::-webkit-details-marker { display: none; }
+details.fold > summary span { color: var(--brass); }
+details.fold > summary::after {
+  content: "";
+  margin-left: auto;
+  width: 8px;
+  height: 8px;
+  border-right: 1.5px solid var(--ink);
+  border-bottom: 1.5px solid var(--ink);
+  transform: rotate(45deg) translateY(-2px);
+  flex: none;
+}
+details.fold[open] > summary::after { transform: rotate(-135deg) translateY(-2px); }
+details.fold .quiet { margin: 0 0 12px; }
+.body-picks {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.pick {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 6px 10px;
+  background: #fffdf8;
+  cursor: pointer;
+  text-align: center;
+}
+.pick input {
+  position: absolute;
+  opacity: 0;
+  width: 1px;
+  height: 1px;
+  min-height: 0;
+}
+.pick img, .pick-blank {
+  width: 100%;
+  aspect-ratio: 2 / 3;
+  object-fit: cover;
+  border-radius: 8px;
+  background: var(--paper);
+}
+.pick-blank {
+  display: grid;
+  place-items: center;
+  font-family: var(--serif);
+  font-size: 1.8rem;
+  color: var(--brass);
+  border: 1px dashed var(--line);
+}
+.pick-name { font-family: var(--serif); font-size: 0.92rem; }
+.pick small { color: var(--muted); font-size: 0.72rem; line-height: 1.25; }
+.pick:has(input:checked) { border-color: var(--fairway); box-shadow: inset 0 0 0 1px var(--fairway); }
+.pick:has(input:focus-visible) { outline: 2px solid var(--brass); outline-offset: 2px; }
 legend { font-family: var(--serif); font-size: 1.25rem; padding: 0; }
 legend span { color: var(--brass); margin-right: 8px; }
-legend em { font-style: normal; color: var(--muted); font-family: var(--sans); font-size: 0.85rem; margin-left: 8px; }
+legend em, details.fold summary em { font-style: normal; color: var(--muted); font-family: var(--sans); font-size: 0.85rem; margin-left: 8px; }
 .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
 label { display: flex; flex-direction: column; gap: 6px; font-size: 0.92rem; }
 .wide { margin-top: 12px; }
@@ -158,7 +228,8 @@ th { font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; colo
 .bag-preference { box-shadow: inset 3px 0 0 var(--brass); }
 
 @media (max-width: 900px) {
-  .hero, .bags, .grid { grid-template-columns: 1fr; }
+  .hero, .bags, .grid, .body-picks { grid-template-columns: 1fr; }
+  .body-picks { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .top { align-items: flex-start; flex-direction: column; }
 }
 @media print {
