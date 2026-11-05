@@ -48,7 +48,13 @@ def canonical_brand(name: str | None) -> str | None:
     if not name:
         return None
     key = "".join(ch for ch in name.lower() if ch.isalnum())
-    return BRAND_ALIASES.get(key)
+    if key in BRAND_ALIASES:
+        return BRAND_ALIASES[key]
+    for brand in get_catalog()["brands"]:
+        token = "".join(ch for ch in brand["name"].lower() if ch.isalnum())
+        if token == key:
+            return brand["name"]
+    return None
 
 
 def assign_brands(profile: GolferProfile) -> dict:
@@ -95,11 +101,17 @@ def pick_head(
     category: str,
     launch: str,
     target_loft: float | None,
+    style: str | None = None,
 ) -> dict:
-    """Closest head in this brand for the slot. Score is explained in SHAFT-1's neighbour."""
+    """Closest head in this list for the slot."""
     pool = [head for head in heads if head["club_type"] == club_type]
+    if style:
+        styled = [head for head in pool if head.get("putter_style") == style]
+        if styled:
+            pool = styled
     if not pool:
         raise LookupError(f"No {club_type} head in catalog slice")
+    pool = sorted(pool, key=lambda head: head["model"])
 
     def score(head: dict) -> float:
         value = 0.0
@@ -164,6 +176,14 @@ def pick_shaft(
     chosen = max(pool, key=score)
     used, _steps = flex_choice(chosen)
     return chosen, used, float(chosen["flex_weights"][used])
+
+
+def _slice(heads: list[dict], brand: str, club_type: str) -> list[dict]:
+    """This house's heads, or the whole catalog when that house has none of the slot."""
+    own = [head for head in heads if head["brand"] == brand and head["club_type"] == club_type]
+    if own:
+        return own
+    return [head for head in heads if head["club_type"] == club_type]
 
 
 def _fairway_loft(swing_speed: float, orientation: str) -> tuple[str, float]:
@@ -291,8 +311,8 @@ def _build_set(
 ) -> dict:
     catalog = get_catalog()
     brand = brands[orientation]
-    heads = [head for head in catalog["heads"] if head["brand"] == brand]
-    shafts = [shaft for shaft in catalog["shafts"] if shaft["brand"] == brand]
+    heads = catalog["heads"]
+    shafts = catalog["shafts"]
     flex = target["flex"]
     # Set bias is applied to the pre-medical category, then capped by MED-1 so a
     # control bag cannot walk a low-bone-density golfer back into a players head.
@@ -307,14 +327,14 @@ def _build_set(
     raw_driver_loft = target["driver_loft_base"] + SET_LOFT_BIAS[orientation] + target["medical_loft_delta"]
     raw_driver_loft = max(7.5, min(16.0, raw_driver_loft))
 
-    driver_head = pick_head(heads, "driver", category, launch, raw_driver_loft)
+    driver_head = pick_head(_slice(heads, brand, "driver"), "driver", category, launch, raw_driver_loft)
     driver_loft = _snap_loft(raw_driver_loft, driver_head["lofts"])
     driver_shaft, driver_flex, driver_weight = pick_shaft(
         shafts, "driver", flex, shaft_profile, weight_delta
     )
 
     fw_label, fw_loft_target = _fairway_loft(target["swing_speed_mph"], orientation)
-    fw_head = pick_head(heads, "fairway_wood", category, launch, fw_loft_target)
+    fw_head = pick_head(_slice(heads, brand, "fairway_wood"), "fairway_wood", category, launch, fw_loft_target)
     fw_loft = _snap_loft(fw_loft_target, fw_head["lofts"])
     fw_shaft, fw_flex, fw_weight = pick_shaft(
         shafts, "fairway", flex, shaft_profile, weight_delta
@@ -326,29 +346,35 @@ def _build_set(
         target["swing_speed_mph"],
         target["avoid_heavy"],
     )
-    long_head = pick_head(heads, long_type, category, launch, long_target)
+    long_heads = _slice(heads, brand, long_type)
+    if not long_heads and long_type == "utility_iron":
+        long_type = "hybrid"
+        long_target = 19.0 if target["swing_speed_mph"] >= 90 else 22.0
+        long_label = f"{long_target:.0f}° hybrid"
+        long_heads = _slice(heads, brand, long_type)
+    long_head = pick_head(long_heads, long_type, category, launch, long_target)
     long_loft = _snap_loft(long_target, long_head["lofts"])
     long_family = "hybrid" if long_type == "hybrid" else "utility_iron"
     long_shaft, long_flex, long_weight = pick_shaft(
         shafts, long_family, flex, shaft_profile, weight_delta
     )
 
-    iron_head = pick_head(heads, "iron_set", category, launch, None)
+    iron_head = pick_head(_slice(heads, brand, "iron_set"), "iron_set", category, launch, None)
     iron_shaft, iron_flex, iron_weight = pick_shaft(
         shafts, "iron", flex, shaft_profile, weight_delta
     )
 
-    wedge_head = pick_head(heads, "wedge", category, "mid", None)
+    wedge_head = pick_head(_slice(heads, brand, "wedge"), "wedge", category, "mid", None)
     wedge_shaft, wedge_flex, wedge_weight = pick_shaft(
         shafts, "wedge", flex, "control" if orientation == "control" else "neutral", weight_delta
     )
-    wedges = _wedge_lofts(iron_head["pw_loft"], wedge_head["lofts"])
+    wedges = _wedge_lofts(iron_head.get("pw_loft") or 44.0, wedge_head["lofts"])
 
-    putter_head = pick_head(heads, "putter", category, "mid", None)
+    style = _putter_style(target["head_category"], profile.handicap, profile.medical_flags)
+    putter_head = pick_head(_slice(heads, brand, "putter"), "putter", category, "mid", None, style=style)
     putter_shaft, putter_flex, putter_weight = pick_shaft(
         shafts, "putter", "R", "neutral", 0
     )
-    style = _putter_style(target["head_category"], profile.handicap, profile.medical_flags)
 
     gender = profile.gender
     length_delta = target["length_delta_in"]
@@ -466,8 +492,8 @@ def _build_set(
         for club in clubs:
             if club["slot"] != "putter" and club["flex"] != flex:
                 mix_notes.append(
-                    f"{club['label']} is {club['flex']} flex because {brand} "
-                    f"does not offer {club['shaft']['model']} in {flex}."
+                    f"{club['label']} is {club['flex']} flex because {club['shaft']['model']} "
+                    f"is not made in {flex}."
                 )
     if putter_flex != flex:
         mix_notes.append(
@@ -574,10 +600,15 @@ def _rationale(
     sentences.append(
         f"The rest of the bag is a {fairway['label']} ({fairway['head']['model']}), "
         f"a {long_club['label']} ({long_club['head']['model']}), "
-        f"{irons['head']['model']} ({irons['head']['set_makeup']}) with "
+        f"{irons['head']['model']} ({irons['head'].get('set_makeup') or 'set'}) with "
         f"{irons['shaft']['model']}, wedges at {wedge_lofts} ({wedge_lofts and wedges[0]['head']['model']}), "
         f"and a {putter['label']}."
     )
+    house = brands[orientation]
+    if any(club["head"]["brand"] != house for club in clubs):
+        sentences.append(
+            f"{house} does not list every slot in the source catalog, so the missing pieces come from other houses."
+        )
     return " ".join(sentences)
 
 

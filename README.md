@@ -10,7 +10,7 @@ It is a starting sheet for a professional fitter, not a substitute for a lie boa
 - A specific head and shaft on every club, in one flex family when the catalog allows it.
 - Plain-language rationale, the rule ids that fired, CSV / PDF / JSON export.
 - JWT auth, optional profile, “taken to fitter” feedback.
-- A v1 catalog: Titleist, TaylorMade, Callaway. Ten heads and ten shafts each. Names are synthetic; loft ladders and shaft weights are realistic and meant to be extended.
+- The catalog is `data/club-catalog.csv` (heads and shafts from the supplied file). A bag prefers that brand and borrows a missing slot from another house. Shafts are matched from the shaft companies in the file.
 
 The rule engine is the source of truth. An optional scikit-learn tree (`scripts/train_ranker.py`) can only try to recover the flex label. It is never asked to choose a club.
 
@@ -112,7 +112,7 @@ python scripts/train_ranker.py
 
 ## Extend the catalog
 
-Edit [`app/catalog/data.py`](app/catalog/data.py). Each house needs a bag it can actually fill: two drivers (players and max), a fairway with 15° and 18°, a hybrid, a utility iron, players / game-improvement / max irons, a wedge from 46° to 60°, a putter, and shafts that cover driver, fairway, hybrid, iron, wedge, and a stock putter shaft.
+Replace or add rows in [`data/club-catalog.csv`](data/club-catalog.csv), then restart so the seed reloads. One row per loft (heads) or flex (shafts). The loader groups those into one head or shaft per model.
 
 Restart, or run `python -m app.seed`. Seed upserts on id, so edits replace the row instead of duplicating it. Add a brand by appending to `BRANDS` and to `BRAND_ORDER` in the rulebook, and teach `canonical_brand` the alias.
 
@@ -169,7 +169,8 @@ Bearer tokens work the same way: `Authorization: Bearer <access_token>`. The int
 | `app/fitting/rulebook.py` | Constants and the words a fitter audits |
 | `app/fitting/specs.py` | Speed, flex, length, lie, grip, medical |
 | `app/fitting/engine.py` | Three bags and the rationales |
-| `app/catalog/data.py` | v1 heads and shafts |
+| `data/club-catalog.csv` | Supplied heads and shafts |
+| `app/catalog/load.py` | Groups the CSV into models the fitter can match |
 | `app/synthetic.py` | Labelled profile generator |
 | `app/api/routes.py` | REST |
 | `app/web/routes.py` | Server-rendered desk |

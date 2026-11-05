@@ -218,7 +218,17 @@ STANDARD_LENGTH_IN = {
     },
 }
 
-BRAND_ORDER = ["Titleist", "TaylorMade", "Callaway"]
+BRAND_ORDER = [
+    "Titleist",
+    "TaylorMade",
+    "Callaway",
+    "Ping",
+    "Mizuno",
+    "Cobra",
+    "Srixon",
+    "Wilson",
+    "PXG",
+]
 
 DISCLAIMER = (
     "Static starting point only. Confirm length and lie on a lie board, "

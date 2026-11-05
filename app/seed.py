@@ -28,6 +28,13 @@ def _brand_id(name: str) -> str:
 
 
 def upsert_catalog(session) -> None:
+    keep_brands = {brand["id"] for brand in BRANDS}
+    keep_heads = {head["id"] for head in HEADS}
+    keep_shafts = {shaft["id"] for shaft in SHAFTS}
+    session.query(ClubHead).filter(ClubHead.id.not_in(keep_heads)).delete(synchronize_session=False)
+    session.query(Shaft).filter(Shaft.id.not_in(keep_shafts)).delete(synchronize_session=False)
+    session.query(Brand).filter(Brand.id.not_in(keep_brands)).delete(synchronize_session=False)
+    session.flush()
     for brand in BRANDS:
         row = session.get(Brand, brand["id"])
         if row is None:

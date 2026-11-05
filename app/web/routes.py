@@ -92,7 +92,7 @@ def _ctx(request: Request, user: User | None, **extra):
     return {
         "request": request,
         "user": user,
-        "brands": [brand["name"] for brand in BRANDS],
+        "brands": [brand["name"] for brand in BRANDS if brand.get("has_driver")],
         **extra,
     }
 

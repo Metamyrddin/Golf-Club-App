@@ -51,18 +51,15 @@ def test_health_and_rules(client: TestClient):
     assert {"SS-1", "LL-1", "MED-1", "SET-1"} <= ids
 
 
-def test_catalog_has_three_houses_and_full_bags(client: TestClient):
-    brands = client.get("/api/catalog/brands").json()
-    assert {brand["name"] for brand in brands} == {"Titleist", "TaylorMade", "Callaway"}
+def test_catalog_uses_the_supplied_file(client: TestClient):
+    brands = {brand["name"] for brand in client.get("/api/catalog/brands").json()}
+    assert {"Titleist", "TaylorMade", "Callaway", "Ping", "Mizuno"} <= brands
     heads = client.get("/api/catalog/heads").json()
+    assert any(row["model"] == "Qi35" and row["club_type"] == "driver" for row in heads)
+    assert any(row["model"] == "GT2" for row in heads)
+    assert any("Vokey" in row["model"] for row in heads)
     shafts = client.get("/api/catalog/shafts").json()
-    assert len(heads) >= 30
-    assert len(shafts) >= 30
-    for brand in ("Titleist", "TaylorMade", "Callaway"):
-        types = {row["club_type"] for row in heads if row["brand"] == brand}
-        assert {"driver", "fairway_wood", "hybrid", "iron_set", "wedge", "putter"} <= types
-        assert sum(1 for row in heads if row["brand"] == brand) >= 10
-        assert sum(1 for row in shafts if row["brand"] == brand) >= 10
+    assert any("Ventus" in row["model"] or "HZRDUS" in row["model"] or "Tensei" in row["model"] for row in shafts)
 
 
 def test_profile_requires_login(client: TestClient):
